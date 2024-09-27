@@ -22,6 +22,58 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      # Create ECS Cluster
+      - name: Create ECS Cluster
+        run: |
+          aws ecs create-cluster \
+            --cluster-name medusa-ecs-cluster \
+            --region us-east-1
+
+      # Register ECS Task Definition
+      - name: Register Task Definition
+        run: |
+          echo '{
+            "family": "medusa-task",
+            "executionRoleArn": "arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ecsTaskExecutionRole",
+            "networkMode": "awsvpc",
+            "containerDefinitions": [
+              {
+                "name": "medusa-container",
+                "image": "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/jaswanth-medusa:latest",
+                "memory": 512,
+                "cpu": 256,
+                "essential": true,
+                "portMappings": [
+                  {
+                    "containerPort": 80,
+                    "hostPort": 80,
+                    "protocol": "tcp"
+                  }
+                ]
+              }
+            ],
+            "requiresCompatibilities": ["FARGATE"],
+            "cpu": "256",
+            "memory": "512",
+            "networkMode": "awsvpc"
+          }' > task-def.json
+          
+          aws ecs register-task-definition \
+            --cli-input-json file://task-def.json \
+            --region us-east-1
+
+      # Create ECS Service
+      - name: Create ECS Service
+        run: |
+          aws ecs create-service \
+            --cluster medusa-ecs-cluster \
+            --service-name medusa-ecs-service \
+            --task-definition medusa-task \
+            --desired-count 1 \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=["subnet-0eea857c1cf095bf7", "subnet-065b60dbd16e27db5","subnet-0a308cdbbeacd148b", "subnet-0c8e1c76292e064a0", "subnet-00a37eaefc5a11f57", "subnet-0fa9da9fc82cbcb3f"],securityGroups=[sg-06ecc53427be2eb4c],assignPublicIp=ENABLED}" \
+            --region us-east-1
+
       # Create an Amazon ECR repository (if it doesn't already exist)
       - name: Create ECR Repository
         run: |
