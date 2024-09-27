@@ -71,7 +71,7 @@ jobs:
             --task-definition medusa-task \
             --desired-count 1 \
             --launch-type FARGATE \
-            --network-configuration "awsvpcConfiguration={subnets=["subnet-0eea857c1cf095bf7", "subnet-065b60dbd16e27db5","subnet-0a308cdbbeacd148b", "subnet-0c8e1c76292e064a0", "subnet-00a37eaefc5a11f57", "subnet-0fa9da9fc82cbcb3f"],securityGroups=[sg-06ecc53427be2eb4c],assignPublicIp=ENABLED}" \
+            --network-configuration "awsvpcConfiguration={subnets=["subnet-0a044fda974f92d5b", "subnet-00d236117a99ecb6f", "subnet-0a0f031fdc6225420", "subnet-07173d0b612fb43fe", "subnet-006858bb3e7b5616c", "subnet-0731a727b03c8bf00", "subnet-0ea374aaebc77dfcd"],securityGroups=[sg-0850c1dc0c3cfdbfb],assignPublicIp=ENABLED}" \
             --region us-east-1
 
       # Create an Amazon ECR repository (if it doesn't already exist)
